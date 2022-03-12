@@ -1,11 +1,12 @@
-import { ctx, Game } from "./main";
+import { ctx, Game, GameConfig } from "./main";
 import { Pos } from "./Pos";
 
 export class Cell extends Pos{
     public renX: number;
     public renY: number;
-    private mouseOver: boolean = false;
+    private mouseOver: number = 255;
     public isAlive: boolean = false;
+    private overing: boolean = false;
     constructor(x: number, y: number){
         super(x, y);
         this.renX = x * Game.cellSize;
@@ -18,8 +19,11 @@ export class Cell extends Pos{
     }
 
     public draw(): void {
-        if(this.mouseOver && !this.isAlive) {
-            ctx.fillStyle = "grey";
+        if(this.overing) {
+            this.mouseOver = Math.max(GameConfig.minLight, this.mouseOver - GameConfig.incAmt);
+        } else this.mouseOver = Math.min(GameConfig.maxLight, this.mouseOver + GameConfig.incAmt);
+        if(this.mouseOver != GameConfig.maxLight && !this.isAlive) {
+            ctx.fillStyle = `rgb(${this.mouseOver}, ${this.mouseOver}, ${this.mouseOver})`;
             this.fillRect();
         }
         if(this.isAlive) {
@@ -34,11 +38,11 @@ export class Cell extends Pos{
     }
 
     public mouseIn(): void {
-        this.mouseOver = true;
+        this.overing = true;
     }
 
     public mouseOut(): void {
-        this.mouseOver = false;
+        this.overing = false;
     }
 
     public press(): boolean {

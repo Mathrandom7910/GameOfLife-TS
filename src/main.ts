@@ -14,7 +14,10 @@ clearBtn = <HTMLButtonElement> document.getElementById("clearBtn");
 
 export enum GameConfig {
   settingSize = 25,
-  maxTickCount = 15
+  maxTickCount = 15,
+  incAmt = 10,
+  minLight = 100,
+  maxLight = 200
 }
 
 export class Game {
