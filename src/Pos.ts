@@ -23,12 +23,12 @@ export class Pos {
         return this.x == pos.x && this.y == pos.y;
     }
 
-    public get clone(): Pos {
+    public clone(): Pos {
         return new Pos(this);
     }
 
     public add(x: number, y: number): Pos {
-        const pos = this.clone;
+        const pos = this.clone();
         pos.x += x;
         pos.y += y;
         return pos;

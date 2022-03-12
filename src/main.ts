@@ -8,7 +8,8 @@ settings = <HTMLDivElement> document.getElementById("settings"),
 runCheckBox = <HTMLInputElement> document.getElementById("runSim"),
 updateFrameInt = <HTMLInputElement> document.getElementById("updateFrame"),
 updateFrameDisp = <HTMLLabelElement> document.getElementById("uFDisp"),
-clearBtn = <HTMLButtonElement> document.getElementById("clearBtn");
+clearBtn = <HTMLButtonElement> document.getElementById("clearBtn"),
+recBox = <HTMLInputElement> document.getElementById("recBox");
 
 
 
@@ -17,7 +18,9 @@ export enum GameConfig {
   maxTickCount = 15,
   incAmt = 10,
   minLight = 100,
-  maxLight = 200
+  maxLight = 200,
+  maxSize = 4,
+  sizeInc = .2
 }
 
 export class Game {
@@ -35,6 +38,7 @@ export class Game {
   private lastFrameTime: number = Date.now();
   private tickCount: number = 0;
   private maxTickCount: number = GameConfig.maxTickCount;
+  private pressedCell: Cell | null = null;
 
   public genCells(killCells: boolean = true) {
     for(let x = 0; x < canvas.width / Game.cellSize; x++) {
@@ -98,12 +102,13 @@ export class Game {
       if(this.isSettingUp) return;
       this.mouse.isDown = true;
       this.currentCell.press();
+      this.pressedCell = this.currentCell;
     }
 
     document.onmouseup = () => {
       if(this.isSettingUp) return;
       this.mouse.isDown = false;
-      this.currentCell.release();
+      this.pressedCell?.release();
     }
 
     document.onwheel = (e) => {
@@ -123,11 +128,15 @@ export class Game {
 
   }
 
-  private getMouseCell() : Cell {
+  public getClass(): typeof Game {
+    return Game;
+  }
+
+  private getMouseCell(): Cell {
     return this.cells[Math.floor(this.mouse.x / Game.cellSize)][Math.floor(this.mouse.y / Game.cellSize)];
   }
 
-  public async render(){
+  public render(): void{
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     this.tickCount++;
@@ -136,12 +145,17 @@ export class Game {
     this.lastFrameTime = Date.now();
     this.fps = Math.floor(1000 / this.frameTime);
 
+    var pressedCell: Cell | null = null;
+
     ctx.strokeStyle = "darkgrey";
     for(let x = 0; x < this.cells.length; x++) {
       for(let y = 0; y < this.cells[x].length; y++) {
         this.cells[x][y].draw();
+        if(this.cells[x][y].isPressed) pressedCell = this.cells[x][y];
       }
     }
+
+    pressedCell?.draw();
 
     if(this.isRunning && this.tickCount >= this.maxTickCount){
       this.tick();
@@ -190,7 +204,7 @@ export class Game {
         }
       }
     }
-    cellsTog.forEach(cell => cell.press());
+    cellsTog.forEach(cell => cell.press(true));
   }
 
   private getCellsArround(x1: number, y1: number): number {

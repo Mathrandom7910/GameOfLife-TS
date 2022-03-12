@@ -7,6 +7,9 @@ export class Cell extends Pos{
     private mouseOver: number = 255;
     public isAlive: boolean = false;
     private overing: boolean = false;
+    private size: number = Game.cellSize;
+    public isPressed: boolean = false;
+    private size1: number = 0;
     constructor(x: number, y: number){
         super(x, y);
         this.renX = x * Game.cellSize;
@@ -22,6 +25,13 @@ export class Cell extends Pos{
         if(this.overing) {
             this.mouseOver = Math.max(GameConfig.minLight, this.mouseOver - GameConfig.incAmt);
         } else this.mouseOver = Math.min(GameConfig.maxLight, this.mouseOver + GameConfig.incAmt);
+
+        if(this.isPressed) {
+            this.size = Math.min(Game.cellSize + GameConfig.maxSize, this.size + GameConfig.sizeInc);
+        } else this.size = Math.max(Game.cellSize, this.size - GameConfig.sizeInc);
+
+        this.size1 = this.size != Game.cellSize ? this.size / 10 : 0;
+
         if(this.mouseOver != GameConfig.maxLight && !this.isAlive) {
             ctx.fillStyle = `rgb(${this.mouseOver}, ${this.mouseOver}, ${this.mouseOver})`;
             this.fillRect();
@@ -30,11 +40,11 @@ export class Cell extends Pos{
             ctx.fillStyle = "black";
             this.fillRect();
         }
-        ctx.strokeRect(this.renX, this.renY, Game.cellSize, Game.cellSize);
+        ctx.strokeRect(this.renX - this.size1, this.renY - this.size1, this.size, this.size);
     }
 
     private fillRect(): void {
-        ctx.fillRect(this.renX, this.renY, Game.cellSize, Game.cellSize);
+        ctx.fillRect(this.renX - this.size1, this.renY - this.size1, this.size, this.size);
     }
 
     public mouseIn(): void {
@@ -45,7 +55,8 @@ export class Cell extends Pos{
         this.overing = false;
     }
 
-    public press(): boolean {
+    public press(sim = false): boolean {
+        if(!sim) this.isPressed = true;
         return this.isAlive = !this.isAlive;
     }
 
@@ -54,6 +65,6 @@ export class Cell extends Pos{
     }
 
     public release(): void {
-        //add anim
+        this.isPressed = false;
     }
 }
